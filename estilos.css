@@ -1,0 +1,108 @@
+/* Reset básico */
+body, html {
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
+    background: linear-gradient(135deg, #2d0b0b 0%, #7b1f1f 100%);
+    min-height: 100vh;
+    color: #fff;
+}
+
+h2 {
+    color: #ff5252;
+    letter-spacing: 1px;
+    margin-bottom: 20px;
+    text-shadow: 1px 2px 8px #2d0b0b88;
+}
+
+/* Solo estilos para el login */
+#login {
+    background: rgba(40, 0, 0, 0.93);
+    border-radius: 18px;
+    box-shadow: 0 8px 32px 0 rgba(44,0,0,0.37);
+    max-width: 350px;
+    margin: 40px auto 20px auto;
+    padding: 32px 28px 24px 28px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+input[type="text"], input[type="password"] {
+    width: 90%;
+    padding: 12px 10px;
+    margin: 10px 0 18px 0;
+    border: none;
+    border-radius: 8px;
+    background: #fff3f3;
+    color: #7b1f1f;
+    font-size: 1rem;
+    outline: none;
+    box-shadow: 0 2px 8px #7b1f1f22;
+    transition: box-shadow 0.2s;
+}
+input:focus {
+    box-shadow: 0 0 0 2px #ff5252;
+}
+
+button {
+    background: linear-gradient(90deg, #ff5252 0%, #b71c1c 100%);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 32px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    margin-top: 10px;
+    cursor: pointer;
+    box-shadow: 0 4px 16px #b71c1c44;
+    transition: background 0.2s, transform 0.1s;
+}
+button:hover {
+    background: linear-gradient(90deg, #b71c1c 0%, #ff5252 100%);
+    transform: translateY(-2px) scale(1.04);
+}
+
+/* Quitar estilos de los otros componentes */
+#salas,
+#logout,
+#peliculasContainer select,
+#asientosContainer,
+.asiento,
+.disponible,
+.ocupado,
+.reservado {
+    all: unset;
+    margin: 0;
+    padding: 0;
+    box-shadow: none;
+    background: none;
+    border: none;
+    color: inherit;
+    font: inherit;
+    border-radius: 0;
+    display: revert;
+}
+
+@media (max-width: 600px) {
+    #login {
+        max-width: 98vw;
+        padding: 18px 6vw 18px 6vw;
+    }
+}
+
+::-webkit-scrollbar {
+    width: 8px;
+    background: #2d0b0b;
+}
+::-webkit-scrollbar-thumb {
+    background: #b71c1c;
+    border-radius: 8px;
+    border-radius: 8px;
+    opacity: 0.7;
+}
+.reservado {
+    background: linear-gradient(135deg, #ffd600 60%, #ff5252 100%);
+    color: #b71c1c;
+    border: 2px solid #ffd600;
+}
