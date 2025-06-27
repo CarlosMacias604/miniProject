@@ -1,12 +1,12 @@
 from typing import *
 from fastapi import APIRouter, Body, Depends
 from fastapi.security import OAuth2PasswordBearer
-from api.controllers.sales.get_all_sales import get_all_sales_controller
-from api.controllers.sales.get_sale_by_id import get_sale_by_id_controller
-from api.controllers.sales.create_sale import create_sale_controller
-from api.controllers.sales.update_sale_by_id import update_sale_by_id_controller
-from api.controllers.sales.delete_sale_by_id import delete_sale_by_id_controller
-from api.helpers.token import get_current_user
+from controllers.sales.get_all_sales import get_all_sales_controller
+from controllers.sales.get_sale_by_id import get_sale_by_id_controller
+from controllers.sales.create_sale import create_sale_controller
+from controllers.sales.update_sale_by_id import update_sale_by_id_controller
+from controllers.sales.delete_sale_by_id import delete_sale_by_id_controller
+from helpers.token import get_current_user
 
 router = APIRouter()
 

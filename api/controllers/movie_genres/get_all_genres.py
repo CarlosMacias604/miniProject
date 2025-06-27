@@ -1,5 +1,5 @@
 from fastapi import HTTPException
-from api.database.crud_tables.genres import get_all_genres, MySQLConnection
+from database.crud_tables.genres import get_all_genres, MySQLConnection
 import traceback
 
 def get_all_genres_controller(data: dict):

@@ -1,5 +1,5 @@
 from fastapi import HTTPException
-from api.database.crud_tables.users import get_value_from_user_by_id, MySQLConnection
+from database.crud_tables.users import get_value_from_user_by_id, MySQLConnection
 import traceback
 from mysql.connector import Error
 

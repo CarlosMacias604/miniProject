@@ -1,5 +1,5 @@
 from fastapi import HTTPException
-from api.database.crud_tables.genres import create_genre, MySQLConnection
+from database.crud_tables.genres import create_genre, MySQLConnection
 import traceback
 
 def create_genre_controller(data: dict):

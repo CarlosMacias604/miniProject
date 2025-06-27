@@ -4,9 +4,9 @@ import sys
 root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 sys.path.append(root_dir)
 
-from api.database.crud_tables.users import *
-from api.database.crud_tables.memberships import *
-from api.database.crud_tables.movies import *
+from database.crud_tables.users import *
+from database.crud_tables.memberships import *
+from database.crud_tables.movies import *
 from mysql_connection import MySQLConnection
 import json
 from datetime import datetime

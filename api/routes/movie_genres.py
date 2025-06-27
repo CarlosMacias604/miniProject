@@ -1,12 +1,12 @@
 from typing import *
 from fastapi import APIRouter, Body, Depends
 from fastapi.security import OAuth2PasswordBearer
-from api.controllers.movie_genres.get_all_genres import get_all_genres_controller
-from api.controllers.movie_genres.get_genre_by_id import get_genre_by_id_controller
-from api.controllers.movie_genres.create_genre import create_genre_controller
-from api.controllers.movie_genres.update_genre_by_id import update_genre_by_id_controller
-from api.controllers.movie_genres.delete_genre_by_id import delete_genre_by_id_controller
-from api.helpers.token import get_current_user
+from controllers.movie_genres.get_all_genres import get_all_genres_controller
+from controllers.movie_genres.get_genre_by_id import get_genre_by_id_controller
+from controllers.movie_genres.create_genre import create_genre_controller
+from controllers.movie_genres.update_genre_by_id import update_genre_by_id_controller
+from controllers.movie_genres.delete_genre_by_id import delete_genre_by_id_controller
+from helpers.token import get_current_user
 
 router = APIRouter()
 

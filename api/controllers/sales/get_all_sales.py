@@ -1,5 +1,5 @@
 from fastapi import HTTPException
-from api.database.crud_tables.sales import get_all_sales, MySQLConnection
+from database.crud_tables.sales import get_all_sales, MySQLConnection
 import traceback
 
 def get_all_sales_controller(data: dict):

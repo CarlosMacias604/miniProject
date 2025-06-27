@@ -1,4 +1,4 @@
-from api.database.mysql_connection import MySQLConnection
+from database.mysql_connection import MySQLConnection
 
 def get_all_sales(db: MySQLConnection):
     db.execute("SELECT * FROM sales")

@@ -1,12 +1,12 @@
 from typing import *
 from fastapi import APIRouter, Body, Depends
 from fastapi.security import OAuth2PasswordBearer
-from api.controllers.memberships.get_all_memberships import get_all_memberships_controller
-from api.controllers.memberships.get_membership_by_id import get_membership_by_id_controller
-from api.controllers.memberships.create_membership import create_membership_controller
-from api.controllers.memberships.update_membership_by_id import update_membership_by_id_controller
-from api.controllers.memberships.delete_membership_by_id import delete_membership_by_id_controller
-from api.helpers.token import get_current_user
+from controllers.memberships.get_all_memberships import get_all_memberships_controller
+from controllers.memberships.get_membership_by_id import get_membership_by_id_controller
+from controllers.memberships.create_membership import create_membership_controller
+from controllers.memberships.update_membership_by_id import update_membership_by_id_controller
+from controllers.memberships.delete_membership_by_id import delete_membership_by_id_controller
+from helpers.token import get_current_user
 
 router = APIRouter()
 

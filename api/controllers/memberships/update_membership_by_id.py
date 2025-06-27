@@ -1,5 +1,5 @@
 from fastapi import HTTPException
-from api.database.crud_tables.memberships import update_membership_by_id, MySQLConnection
+from database.crud_tables.memberships import update_membership_by_id, MySQLConnection
 import traceback
 
 def update_membership_by_id_controller(data: dict):

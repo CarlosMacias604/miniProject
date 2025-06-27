@@ -1,5 +1,5 @@
 from fastapi import HTTPException
-from api.database.crud_tables.users import get_if_user_is_active_by_id, MySQLConnection
+from database.crud_tables.users import get_if_user_is_active_by_id, MySQLConnection
 import traceback
 
 def get_if_user_is_active_by_id_controller(data: dict):

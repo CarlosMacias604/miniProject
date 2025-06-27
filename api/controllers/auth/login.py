@@ -1,7 +1,7 @@
 from fastapi import HTTPException
-from api.database.crud_tables.users import *
-from api.helpers.hash import verify_password
-from api.helpers.token import *
+from database.crud_tables.users import *
+from helpers.hash import verify_password
+from helpers.token import *
 import traceback
 
 def login_controller(data: dict):

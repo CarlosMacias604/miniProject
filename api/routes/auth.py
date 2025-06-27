@@ -1,7 +1,7 @@
 from typing import *
 from fastapi import APIRouter, Body
-from api.controllers.auth.login import login_controller
-from api.controllers.auth.refresh import refresh_token_controller
+from controllers.auth.login import login_controller
+from controllers.auth.refresh import refresh_token_controller
 
 router = APIRouter()
 

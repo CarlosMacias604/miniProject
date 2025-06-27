@@ -1,13 +1,13 @@
 from typing import *
 from fastapi import APIRouter, Body, Depends
 from fastapi.security import OAuth2PasswordBearer
-from api.controllers.movies.get_all_movies import get_all_movies_controller
-from api.controllers.movies.get_movie_by_id import get_movie_by_id_controller
-from api.controllers.movies.create_movie import create_movie_controller
-from api.controllers.movies.update_movie_by_id import update_movie_by_id_controller
-from api.controllers.movies.delete_movie_by_id import delete_movie_by_id_controller
-from api.controllers.movies.search_movies import search_movies_controller
-from api.helpers.token import get_current_user
+from controllers.movies.get_all_movies import get_all_movies_controller
+from controllers.movies.get_movie_by_id import get_movie_by_id_controller
+from controllers.movies.create_movie import create_movie_controller
+from controllers.movies.update_movie_by_id import update_movie_by_id_controller
+from controllers.movies.delete_movie_by_id import delete_movie_by_id_controller
+from controllers.movies.search_movies import search_movies_controller
+from helpers.token import get_current_user
 
 router = APIRouter()
 

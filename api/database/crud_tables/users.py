@@ -1,5 +1,5 @@
-from api.database.mysql_connection import MySQLConnection
-from api.helpers.hash import hash_password
+from database.mysql_connection import MySQLConnection
+from helpers.hash import hash_password
 
 
 

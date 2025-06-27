@@ -1,5 +1,5 @@
 from fastapi import HTTPException
-from api.database.crud_tables.users import *
+from database.crud_tables.users import *
 import traceback
 
 def get_all_active_users_controller(data: dict):

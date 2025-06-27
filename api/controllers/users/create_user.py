@@ -1,5 +1,5 @@
 from fastapi import HTTPException
-from api.database.crud_tables.users import create_user, MySQLConnection, get_if_user_exists
+from database.crud_tables.users import create_user, MySQLConnection, get_if_user_exists
 import traceback
 
 def create_user_controller(data: dict):

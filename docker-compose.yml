@@ -1,4 +1,3 @@
-
 services:
   cine-mysql:
     image: mysql:8.0
@@ -18,14 +17,16 @@ services:
     container_name: cine-backend
     working_dir: /app
     volumes:
-      - ./auth:/app
+      - ./api:/app
     command: >
-      sh -c "pip install fastapi uvicorn mysql-connector-python python-dotenv passlib python-jose[cryptography] pydantic[email] &&
+      sh -c "pip install fastapi uvicorn mysql-connector-python python-dotenv passlib python-jose[cryptography] bcrypt &&
              uvicorn main:app --host 0.0.0.0 --port 8000"
     ports:
       - "5000:8000"
     depends_on:
       - cine-mysql
+    environment:
+      - MYSQL_HOST=cine-mysql
     networks:
       - cine-network
 

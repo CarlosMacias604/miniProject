@@ -1,4 +1,4 @@
-from api.database.mysql_connection import MySQLConnection
+from database.mysql_connection import MySQLConnection
 
 def get_all_movie_genres(db: MySQLConnection):
     db.execute("SELECT * FROM movie_genres")

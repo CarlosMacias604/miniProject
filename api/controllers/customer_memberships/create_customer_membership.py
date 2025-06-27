@@ -1,5 +1,5 @@
 from fastapi import HTTPException
-from api.database.crud_tables.customer_memberships import create_customer_membership, MySQLConnection
+from database.crud_tables.customer_memberships import create_customer_membership, MySQLConnection
 import traceback
 
 def create_customer_membership_controller(data: dict):

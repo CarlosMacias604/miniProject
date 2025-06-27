@@ -1,12 +1,12 @@
 from typing import *
 from fastapi import APIRouter, Body, Depends
 from fastapi.security import OAuth2PasswordBearer
-from api.controllers.reserved_seats.get_all_reserved_seats import get_all_reserved_seats_controller
-from api.controllers.reserved_seats.get_reserved_seat_by_id import get_reserved_seat_by_id_controller
-from api.controllers.reserved_seats.create_reserved_seat import create_reserved_seat_controller
-from api.controllers.reserved_seats.update_reserved_seat_by_id import update_reserved_seat_by_id_controller
-from api.controllers.reserved_seats.delete_reserved_seat_by_id import delete_reserved_seat_by_id_controller
-from api.helpers.token import get_current_user
+from controllers.reserved_seats.get_all_reserved_seats import get_all_reserved_seats_controller
+from controllers.reserved_seats.get_reserved_seat_by_id import get_reserved_seat_by_id_controller
+from controllers.reserved_seats.create_reserved_seat import create_reserved_seat_controller
+from controllers.reserved_seats.update_reserved_seat_by_id import update_reserved_seat_by_id_controller
+from controllers.reserved_seats.delete_reserved_seat_by_id import delete_reserved_seat_by_id_controller
+from helpers.token import get_current_user
 
 router = APIRouter()
 

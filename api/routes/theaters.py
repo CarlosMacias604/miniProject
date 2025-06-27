@@ -1,12 +1,12 @@
 from typing import *
 from fastapi import APIRouter, Body, Depends
 from fastapi.security import OAuth2PasswordBearer
-from api.controllers.theaters.get_all_theaters import get_all_theaters_controller
-from api.controllers.theaters.get_theater_by_id import get_theater_by_id_controller
-from api.controllers.theaters.create_theater import create_theater_controller
-from api.controllers.theaters.update_theater_by_id import update_theater_by_id_controller
-from api.controllers.theaters.delete_theater_by_id import delete_theater_by_id_controller
-from api.helpers.token import get_current_user
+from controllers.theaters.get_all_theaters import get_all_theaters_controller
+from controllers.theaters.get_theater_by_id import get_theater_by_id_controller
+from controllers.theaters.create_theater import create_theater_controller
+from controllers.theaters.update_theater_by_id import update_theater_by_id_controller
+from controllers.theaters.delete_theater_by_id import delete_theater_by_id_controller
+from helpers.token import get_current_user
 
 router = APIRouter()
 

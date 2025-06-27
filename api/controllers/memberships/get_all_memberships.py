@@ -1,5 +1,5 @@
 from fastapi import HTTPException
-from api.database.crud_tables.memberships import get_all_memberships, MySQLConnection
+from database.crud_tables.memberships import get_all_memberships, MySQLConnection
 import traceback
 
 def get_all_memberships_controller(data: dict):

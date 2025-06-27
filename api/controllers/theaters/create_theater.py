@@ -1,5 +1,5 @@
 from fastapi import HTTPException
-from api.database.crud_tables.theaters import create_theater, MySQLConnection
+from database.crud_tables.theaters import create_theater, MySQLConnection
 import traceback
 
 def create_theater_controller(data: dict):

@@ -1,17 +1,17 @@
 from typing import *
 from fastapi import APIRouter, Body, Depends
 from fastapi.security import OAuth2PasswordBearer
-from api.controllers.users.get_all_users import get_all_users_controller
-from api.controllers.users.get_all_actived_users import get_all_active_users_controller
-from api.controllers.users.get_if_user_is_active_by_id import get_if_user_is_active_by_id_controller
-from api.controllers.users.get_id_by_username import get_id_by_username_controller
-from api.controllers.users.get_value_from_user_by_id import get_value_from_user_by_id_controller
-from api.controllers.users.search_user_by_name import search_user_by_name_controller
-from api.controllers.users.get_if_user_exists import get_if_user_exists_controller
-from api.controllers.users.create_user import create_user_controller
-from api.controllers.users.update_user_by_id import update_user_by_id_controller
-from api.controllers.users.delete_user_by_id import delete_user_by_id_controller
-from api.helpers.token import get_current_user
+from controllers.users.get_all_users import get_all_users_controller
+from controllers.users.get_all_actived_users import get_all_active_users_controller
+from controllers.users.get_if_user_is_active_by_id import get_if_user_is_active_by_id_controller
+from controllers.users.get_id_by_username import get_id_by_username_controller
+from controllers.users.get_value_from_user_by_id import get_value_from_user_by_id_controller
+from controllers.users.search_user_by_name import search_user_by_name_controller
+from controllers.users.get_if_user_exists import get_if_user_exists_controller
+from controllers.users.create_user import create_user_controller
+from controllers.users.update_user_by_id import update_user_by_id_controller
+from controllers.users.delete_user_by_id import delete_user_by_id_controller
+from helpers.token import get_current_user
 
 router = APIRouter()
 

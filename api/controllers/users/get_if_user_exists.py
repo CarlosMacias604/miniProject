@@ -1,5 +1,5 @@
 from fastapi import HTTPException
-from api.database.crud_tables.users import get_if_user_exists, MySQLConnection
+from database.crud_tables.users import get_if_user_exists, MySQLConnection
 import traceback
 
 def get_if_user_exists_controller(data: dict):

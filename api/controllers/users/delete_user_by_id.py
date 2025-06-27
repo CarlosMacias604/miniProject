@@ -1,5 +1,5 @@
 from fastapi import HTTPException
-from api.database.crud_tables.users import delete_user_by_id, MySQLConnection, get_if_user_exists, get_value_from_user_by_id
+from database.crud_tables.users import delete_user_by_id, MySQLConnection, get_if_user_exists, get_value_from_user_by_id
 import traceback
 
 def delete_user_by_id_controller(data: dict):

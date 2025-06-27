@@ -1,5 +1,5 @@
 from fastapi import HTTPException
-from api.database.crud_tables.users import search_user_by_name, MySQLConnection
+from database.crud_tables.users import search_user_by_name, MySQLConnection
 import traceback
 
 def search_user_by_name_controller(data: dict):

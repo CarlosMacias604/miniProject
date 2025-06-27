@@ -1,5 +1,5 @@
 from fastapi import HTTPException
-from api.database.crud_tables.reserved_seats import create_reserved_seat, MySQLConnection
+from database.crud_tables.reserved_seats import create_reserved_seat, MySQLConnection
 import traceback
 
 def create_reserved_seat_controller(data: dict):

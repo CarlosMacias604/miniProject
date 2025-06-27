@@ -1,5 +1,5 @@
 from fastapi import HTTPException
-from api.database.crud_tables.movies import create_movie, MySQLConnection
+from database.crud_tables.movies import create_movie, MySQLConnection
 import traceback
 
 def create_movie_controller(data: dict):

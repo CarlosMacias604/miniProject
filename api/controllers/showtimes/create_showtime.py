@@ -1,5 +1,5 @@
 from fastapi import HTTPException
-from api.database.crud_tables.showtimes import create_showtime, MySQLConnection
+from database.crud_tables.showtimes import create_showtime, MySQLConnection
 import traceback
 
 def create_showtime_controller(data: dict):

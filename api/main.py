@@ -5,24 +5,24 @@ root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.append(root_dir)
 
 from fastapi import FastAPI
-from api.database.mysql_connection import MySQLConnection
-from api.routes.auth import router as auth_routes
-from api.routes.users import router as user_routes
-from api.routes.movies import router as movie_routes
-from api.routes.theaters import router as theater_routes
-from api.routes.memberships import router as membership_routes
-from api.routes.movie_genres import router as movie_genre_routes
-from api.routes.showtimes import router as showtime_routes
-from api.routes.sales import router as sale_routes
-from api.routes.reserved_seats import router as reserved_seat_routes
-from api.routes.customer_memberships import router as customer_membership_routes
+from database.mysql_connection import MySQLConnection
+from routes.auth import router as auth_routes
+from routes.users import router as user_routes
+from routes.movies import router as movie_routes
+from routes.theaters import router as theater_routes
+from routes.memberships import router as membership_routes
+from routes.movie_genres import router as movie_genre_routes
+from routes.showtimes import router as showtime_routes
+from routes.sales import router as sale_routes
+from routes.reserved_seats import router as reserved_seat_routes
+from routes.customer_memberships import router as customer_membership_routes
 
 app = FastAPI()
 
 # Initialize the database connection
 db = MySQLConnection(
-    host        = "localhost",
-    port        = 4000,
+    host        = os.getenv("MYSQL_HOST"),
+    port        = 3306,
     user        = "root",
     password    = "root",
     database    = "cine"

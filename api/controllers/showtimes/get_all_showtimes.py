@@ -1,5 +1,5 @@
 from fastapi import HTTPException
-from api.database.crud_tables.showtimes import get_all_showtimes, MySQLConnection
+from database.crud_tables.showtimes import get_all_showtimes, MySQLConnection
 import traceback
 
 def get_all_showtimes_controller(data: dict):
