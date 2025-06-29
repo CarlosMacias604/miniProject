@@ -3,52 +3,686 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Practica Cine</title>
+    <title>CINEMAX - Vive la experiencia del cine moderno</title>
     <link rel="stylesheet" href="estilos.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body>
-    <div style="text-align:center; margin-top:32px;">
-        <span style="font-size:2.2rem; font-weight:bold; color:#ff5252; letter-spacing:2px; text-shadow:1px 2px 8px #2d0b0b88;">
-            🎬 CINEMAX
-        </span>
-        <div style="font-size:1.1rem; color:#fff; margin-top:4px; letter-spacing:1px;">
-            Vive la experiencia del cine moderno
+    <!-- Header con navegación -->
+    <header id="header">
+        <div class="header-content">
+            <div class="logo">
+                <span style="font-size:2.2rem; font-weight:bold; color:#ff5252; letter-spacing:2px; text-shadow:1px 2px 8px #2d0b0b88;">
+                    🎬 CINEMAX
+                </span>
+                <div style="font-size:0.9rem; color:#fff; margin-top:2px; letter-spacing:1px;">
+                    Vive la experiencia del cine moderno
+                </div>
+            </div>
+            <nav id="navigation" style="display:none;">
+                <!-- Navegación para Customer -->
+                <button class="nav-btn active" onclick="showSection('cartelera')" data-roles="customer,employee,admin">
+                    <i class="fas fa-film"></i> Cartelera
+                </button>
+                <button class="nav-btn" onclick="showSection('perfil')" data-roles="customer,employee,admin">
+                    <i class="fas fa-user"></i> Perfil
+                </button>
+                <button class="nav-btn" onclick="showSection('membresiasCustomer')" data-roles="customer" style="display:none;">
+                    <i class="fas fa-crown"></i> Membresías
+                </button>
+                
+                <!-- Navegación para Employee -->
+                <button class="nav-btn" onclick="showSection('ventas')" data-roles="employee,admin" style="display:none;">
+                    <i class="fas fa-cash-register"></i> Ventas
+                </button>
+                <button class="nav-btn" onclick="showSection('horarios')" data-roles="employee,admin" style="display:none;">
+                    <i class="fas fa-clock"></i> Horarios
+                </button>
+                
+                <!-- Navegación para Admin -->
+                <button class="nav-btn" onclick="showSection('usuarios')" data-roles="admin" style="display:none;">
+                    <i class="fas fa-users"></i> Usuarios
+                </button>
+                <button class="nav-btn" onclick="showSection('peliculas')" data-roles="admin" style="display:none;">
+                    <i class="fas fa-video"></i> Películas
+                </button>
+                <button class="nav-btn" onclick="showSection('salas')" data-roles="admin" style="display:none;">
+                    <i class="fas fa-building"></i> Salas
+                </button>
+                <button class="nav-btn" onclick="showSection('membresias')" data-roles="admin" style="display:none;">
+                    <i class="fas fa-id-card"></i> Membresías
+                </button>
+                
+                <button class="nav-btn logout-btn" onclick="cerrarSesion()">
+                    <i class="fas fa-sign-out-alt"></i> Salir
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Loading Spinner -->
+    <div id="loadingSpinner" class="loading-spinner" style="display:none;">
+        <div class="spinner"></div>
+        <p>Cargando...</p>
+    </div>
+
+    <!-- Notificaciones -->
+    <div id="notifications" class="notifications-container"></div>
+
+    <main id="mainContainer">
+        <!-- Sección de Login -->
+        <section id="loginSection" class="main-section">
+            <div class="login-container">
+                <div class="login-form">
+                    <h2><i class="fas fa-user-circle"></i> Iniciar Sesión</h2>
+                    <div class="input-group">
+                        <i class="fas fa-user"></i>
+                        <input type="text" id="username" placeholder="Usuario" required>
+                    </div>
+                    <div class="input-group">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" id="password" placeholder="Contraseña" required>
+                    </div>
+                    <button class="primary-btn" onclick="iniciarSesion()">
+                        <i class="fas fa-sign-in-alt"></i> Entrar
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Sección de Cartelera -->
+        <section id="carteleraSection" class="main-section" style="display:none;">
+            <div class="section-header">
+                <h2><i class="fas fa-film"></i> Cartelera</h2>
+                <div class="search-container">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="searchMovies" placeholder="Buscar películas..." onkeyup="buscarPeliculas()">
+                </div>
+            </div>
+            <div id="moviesGrid" class="movies-grid">
+                <!-- Las películas se cargarán aquí dinámicamente -->
+            </div>
+        </section>
+
+        <!-- Sección de Perfil -->
+        <section id="perfilSection" class="main-section" style="display:none;">
+            <div class="profile-container">
+                <div class="profile-header">
+                    <i class="fas fa-user-circle profile-icon"></i>
+                    <div class="profile-info">
+                        <h3 id="profileName">Usuario</h3>
+                        <p id="profileRole">Cliente</p>
+                    </div>
+                </div>
+                <div class="profile-stats">
+                    <div class="stat-card">
+                        <i class="fas fa-ticket-alt"></i>
+                        <div class="stat-info">
+                            <span class="stat-number" id="totalTickets">0</span>
+                            <span class="stat-label">Boletos Comprados</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-dollar-sign"></i>
+                        <div class="stat-info">
+                            <span class="stat-number" id="totalSpent">$0</span>
+                            <span class="stat-label">Total Gastado</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="purchase-history">
+                    <h4><i class="fas fa-history"></i> Historial de Compras</h4>
+                    <div id="purchaseHistory" class="history-list">
+                        <!-- El historial se cargará aquí -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Sección de Membresías para Customers -->
+        <section id="membresiasCustomerSection" class="main-section" style="display:none;">
+            <div class="section-header">
+                <h2><i class="fas fa-crown"></i> Mis Membresías</h2>
+                <p>Gestiona tu membresía actual y descubre nuevos beneficios</p>
+            </div>
+            
+            <!-- Mi membresía actual -->
+            <div class="membership-current-container">
+                <h3><i class="fas fa-star"></i> Mi Membresía Actual</h3>
+                <div id="currentMembershipCard" class="current-membership-card">
+                    <!-- Se mostrará la membresía actual del usuario -->
+                </div>
+            </div>
+            
+            <!-- Membresías disponibles -->
+            <div class="memberships-available-container">
+                <h3><i class="fas fa-gem"></i> Membresías Disponibles</h3>
+                <div id="availableMemberships" class="memberships-grid">
+                    <!-- Se mostrarán las membresías disponibles -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Sección de Ventas (Employee/Admin) -->
+        <section id="ventasSection" class="main-section" style="display:none;">
+            <div class="section-header">
+                <h2><i class="fas fa-cash-register"></i> Gestión de Ventas</h2>
+                <p>Administra las ventas y reservas del cine</p>
+            </div>
+            <div class="admin-content">
+                <div class="admin-stats">
+                    <div class="stat-card">
+                        <i class="fas fa-dollar-sign"></i>
+                        <div class="stat-info">
+                            <span class="stat-number" id="ventasHoy">$0</span>
+                            <span class="stat-label">Ventas Hoy</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-ticket-alt"></i>
+                        <div class="stat-info">
+                            <span class="stat-number" id="boletosVendidos">0</span>
+                            <span class="stat-label">Boletos Vendidos</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="data-table-container">
+                    <h4><i class="fas fa-list"></i> Ventas Recientes</h4>
+                    <div id="ventasTable" class="data-table">
+                        <!-- Tabla de ventas se cargará aquí -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Sección de Horarios (Employee/Admin) -->
+        <section id="horariosSection" class="main-section" style="display:none;">
+            <div class="section-header">
+                <h2><i class="fas fa-clock"></i> Gestión de Horarios</h2>
+                <p>Administra los horarios de funciones</p>
+                <button class="primary-btn" onclick="abrirModalCrearHorario()">
+                    <i class="fas fa-plus"></i> Nuevo Horario
+                </button>
+            </div>
+            <div class="admin-content">
+                <div class="data-table-container">
+                    <div id="horariosTable" class="data-table">
+                        <!-- Tabla de horarios se cargará aquí -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Sección de Usuarios (Admin) -->
+        <section id="usuariosSection" class="main-section" style="display:none;">
+            <div class="section-header">
+                <h2><i class="fas fa-users"></i> Gestión de Usuarios</h2>
+                <p>Administra los usuarios del sistema</p>
+                <button class="primary-btn" onclick="abrirModalCrearUsuario()">
+                    <i class="fas fa-user-plus"></i> Nuevo Usuario
+                </button>
+            </div>
+            <div class="admin-content">
+                <div class="admin-stats">
+                    <div class="stat-card">
+                        <i class="fas fa-users"></i>
+                        <div class="stat-info">
+                            <span class="stat-number" id="totalUsuarios">0</span>
+                            <span class="stat-label">Total Usuarios</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-user-check"></i>
+                        <div class="stat-info">
+                            <span class="stat-number" id="usuariosActivos">0</span>
+                            <span class="stat-label">Usuarios Activos</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="data-table-container">
+                    <div id="usuariosTable" class="data-table">
+                        <!-- Tabla de usuarios se cargará aquí -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Sección de Películas Admin (Admin) -->
+        <section id="peliculasSection" class="main-section" style="display:none;">
+            <div class="section-header">
+                <h2><i class="fas fa-video"></i> Gestión de Películas</h2>
+                <p>Administra el catálogo de películas</p>
+                <button class="primary-btn" onclick="abrirModalCrearPelicula()">
+                    <i class="fas fa-plus"></i> Nueva Película
+                </button>
+            </div>
+            <div class="admin-content">
+                <div class="data-table-container">
+                    <div id="peliculasAdminTable" class="data-table">
+                        <!-- Tabla de películas se cargará aquí -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Sección de Salas (Admin) -->
+        <section id="salasSection" class="main-section" style="display:none;">
+            <div class="section-header">
+                <h2><i class="fas fa-building"></i> Gestión de Salas</h2>
+                <p>Administra las salas del cine</p>
+                <button class="primary-btn" onclick="abrirModalCrearSala()">
+                    <i class="fas fa-plus"></i> Nueva Sala
+                </button>
+            </div>
+            <div class="admin-content">
+                <div class="data-table-container">
+                    <div id="salasTable" class="data-table">
+                        <!-- Tabla de salas se cargará aquí -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Sección de Membresías (Admin) -->
+        <section id="membresiasSection" class="main-section" style="display:none;">
+            <div class="section-header">
+                <h2><i class="fas fa-id-card"></i> Gestión de Membresías</h2>
+                <p>Administra los tipos de membresías</p>
+                <button class="primary-btn" onclick="abrirModalCrearMembresia()">
+                    <i class="fas fa-plus"></i> Nueva Membresía
+                </button>
+            </div>
+            <div class="admin-content">
+                <div class="data-table-container">
+                    <div id="membresiasTable" class="data-table">
+                        <!-- Tabla de membresías se cargará aquí -->
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Modal de Detalles de Película -->
+    <div id="movieModal" class="modal">
+        <div class="modal-content movie-modal-content">
+            <span class="close" onclick="closeModal('movieModal')">&times;</span>
+            <div class="movie-details">
+                <div class="movie-poster">
+                    <img id="modalMoviePoster" src="" alt="Poster">
+                </div>
+                <div class="movie-info">
+                    <h2 id="modalMovieTitle"></h2>
+                    <div class="movie-meta">
+                        <span class="rating">
+                            <i class="fas fa-star"></i>
+                            <span id="modalMovieRating"></span>
+                        </span>
+                        <span class="release-date" id="modalMovieDate"></span>
+                        <span class="language" id="modalMovieLanguage"></span>
+                    </div>
+                    <div class="genres" id="modalMovieGenres"></div>
+                    <p class="overview" id="modalMovieOverview"></p>
+                    <button class="primary-btn" onclick="verHorarios()">
+                        <i class="fas fa-clock"></i> Ver Horarios
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
-    <div id="mainContainer">
-        <div id="login">
-            <h2>Iniciar Sesión</h2>
-            <input type="text" id="usuario" placeholder="Usuario" >
-            <input type="password" id="contrasena" placeholder="Contraseña">
-            <button onclick="iniciarSesion()">Entrar</button>
-        </div>
 
-        <div id="salas" style="display:none;">
-            <h2>Seleccione sala y Asientos</h2>
-            <select id="salaSeleccion" onchange="generarAsientos()">
-                <option value="1">Sala 1</option>
-                <option value="2">Sala 2</option>
-                <option value="3">Sala 3</option>
-            </select>
-            <div id="peliculasContainer"></div>
-            <div id="asientosContainer"></div>
-            <button onclick="comprar()">Comprar</button>
-        </div>
-
-        <div id="ticket" style="display:none;">
-            <h2>Boleto</h2>
-            <p id="detallesBoleto"></p>
-            <p id="totalPago"></p>
-        </div>
-
-        <div id="logout" style="display:none;">
-            <button onclick="cerrarSesion()">Cerrar Sesión</button>
+    <!-- Modal de Horarios -->
+    <div id="scheduleModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('scheduleModal')">&times;</span>
+            <h2><i class="fas fa-clock"></i> Horarios Disponibles</h2>
+            <div id="showtimesList" class="showtimes-list">
+                <!-- Los horarios se cargarán aquí -->
+            </div>
         </div>
     </div>
+
+    <!-- Modal de Selección de Asientos -->
+    <div id="seatsModal" class="modal">
+        <div class="modal-content seats-modal-content">
+            <span class="close" onclick="closeModal('seatsModal')">&times;</span>
+            <div class="seats-header">
+                <h2><i class="fas fa-couch"></i> Seleccionar Asientos</h2>
+                <div class="showtime-info">
+                    <div id="selectedShowtimeInfo"></div>
+                </div>
+            </div>
+            <div class="cinema-screen">
+                <div class="screen">PANTALLA</div>
+            </div>
+            <div id="seatsContainer" class="seats-container">
+                <!-- Los asientos se generarán aquí -->
+            </div>
+            <div class="seats-legend">
+                <div class="legend-item">
+                    <div class="seat available"></div>
+                    <span>Disponible</span>
+                </div>
+                <div class="legend-item">
+                    <div class="seat selected"></div>
+                    <span>Seleccionado</span>
+                </div>
+                <div class="legend-item">
+                    <div class="seat occupied"></div>
+                    <span>Ocupado</span>
+                </div>
+            </div>
+            <div class="booking-summary">
+                <div class="selected-seats-info">
+                    <span>Asientos seleccionados: </span>
+                    <span id="selectedSeatsDisplay">Ninguno</span>
+                </div>
+                <div class="total-price">
+                    <span>Total: </span>
+                    <span id="totalPrice">$0</span>
+                </div>
+                <button id="confirmBookingBtn" class="primary-btn" onclick="confirmarCompra()" disabled>
+                    <i class="fas fa-credit-card"></i> Confirmar Compra
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmación -->
+    <div id="confirmationModal" class="modal">
+        <div class="modal-content confirmation-modal">
+            <div class="confirmation-header">
+                <i class="fas fa-check-circle success-icon"></i>
+                <h2>¡Compra Exitosa!</h2>
+            </div>
+            <div class="ticket-details">
+                <div class="ticket-header">
+                    <h3>🎫 Boleto Digital CINEMAX</h3>
+                </div>
+                <div id="ticketInfo" class="ticket-content">
+                    <!-- Información del boleto -->
+                </div>
+            </div>
+            <button class="primary-btn" onclick="closeModal('confirmationModal'); showSection('cartelera');">
+                <i class="fas fa-home"></i> Volver a Cartelera
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal para Crear/Editar Usuario -->
+    <div id="usuarioModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('usuarioModal')">&times;</span>
+            <h3 id="usuarioModalTitle"><i class="fas fa-user-plus"></i> Crear Usuario</h3>
+            <form id="usuarioForm">
+                <input type="hidden" id="usuarioId">
+                <div class="form-group">
+                    <label for="usuarioUsername">Nombre de Usuario:</label>
+                    <input type="text" id="usuarioUsername" required>
+                </div>
+                <div class="form-group">
+                    <label for="usuarioFirstName">Nombre:</label>
+                    <input type="text" id="usuarioFirstName" required>
+                </div>
+                <div class="form-group">
+                    <label for="usuarioLastName">Apellido:</label>
+                    <input type="text" id="usuarioLastName" required>
+                </div>
+                <div class="form-group">
+                    <label for="usuarioPhone">Teléfono:</label>
+                    <input type="tel" id="usuarioPhone" placeholder="+1234567890">
+                </div>
+                <div class="form-group">
+                    <label for="usuarioPassword">Contraseña:</label>
+                    <input type="password" id="usuarioPassword" required>
+                </div>
+                <div class="form-group">
+                    <label for="usuarioRole">Rol:</label>
+                    <select id="usuarioRole" required>
+                        <option value="customer">Cliente</option>
+                        <option value="employee">Empleado</option>
+                        <option value="admin">Administrador</option>
+                    </select>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="secondary-btn" onclick="closeModal('usuarioModal')">Cancelar</button>
+                    <button type="submit" class="primary-btn">Guardar Usuario</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal para Crear/Editar Película -->
+    <div id="peliculaModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('peliculaModal')">&times;</span>
+            <h3 id="peliculaModalTitle"><i class="fas fa-plus"></i> Crear Película</h3>
+            <form id="peliculaForm">
+                <input type="hidden" id="peliculaId">
+                <div class="form-group">
+                    <label for="peliculaTitle">Título:</label>
+                    <input type="text" id="peliculaTitle" required>
+                </div>
+                <div class="form-group">
+                    <label for="peliculaOriginalTitle">Título Original:</label>
+                    <input type="text" id="peliculaOriginalTitle" required>
+                </div>
+                <div class="form-group">
+                    <label for="peliculaOriginalLanguage">Idioma Original:</label>
+                    <input type="text" id="peliculaOriginalLanguage" placeholder="es, en, fr, etc." maxlength="10" value="es">
+                </div>
+                <div class="form-group">
+                    <label for="peliculaOverview">Descripción:</label>
+                    <textarea id="peliculaOverview" rows="3" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="peliculaReleaseDate">Fecha de Estreno:</label>
+                    <input type="date" id="peliculaReleaseDate" required>
+                </div>
+                <div class="form-group">
+                    <label for="peliculaPopularity">Popularidad:</label>
+                    <input type="number" id="peliculaPopularity" step="0.1" min="0" required value="1.0">
+                </div>
+                <div class="form-group">
+                    <label for="peliculaVoteAverage">Calificación Promedio:</label>
+                    <input type="number" id="peliculaVoteAverage" step="0.1" min="0" max="10" required value="0.0">
+                </div>
+                <div class="form-group">
+                    <label for="peliculaVoteCount">Número de Votos:</label>
+                    <input type="number" id="peliculaVoteCount" min="0" required value="0">
+                </div>
+                <div class="form-group">
+                    <label for="peliculaGenres">Géneros:</label>
+                    <input type="text" id="peliculaGenres" placeholder="Acción, Drama, Comedia">
+                </div>
+                <div class="form-group">
+                    <label for="peliculaPosterUrl">URL del Poster:</label>
+                    <input type="text" id="peliculaPosterUrl" placeholder="Ej: /ruta/imagen.jpg o https://...">
+                </div>
+                <div class="form-group">
+                    <label for="peliculaWallpaperUrl">URL del Wallpaper:</label>
+                    <input type="text" id="peliculaWallpaperUrl" placeholder="Ej: /ruta/imagen.jpg o https://...">
+                </div>
+                <div class="form-group checkbox-group">
+                    <label class="checkbox-container">
+                        <input type="checkbox" id="peliculaIsAdult">
+                        Contenido para adultos
+                    </label>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="secondary-btn" onclick="closeModal('peliculaModal')">Cancelar</button>
+                    <button type="submit" class="primary-btn">Guardar Película</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal para Crear/Editar Horario -->
+    <div id="horarioModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('horarioModal')">&times;</span>
+            <h3 id="horarioModalTitle"><i class="fas fa-clock"></i> Crear Horario</h3>
+            <form id="horarioForm">
+                <div class="form-group">
+                    <label for="horarioMovie">Película:</label>
+                    <select id="horarioMovie" required>
+                        <option value="">Seleccionar película...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="horarioTheater">Sala:</label>
+                    <select id="horarioTheater" required>
+                        <option value="">Seleccionar sala...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="horarioDate">Fecha:</label>
+                    <input type="date" id="horarioDate" required>
+                </div>
+                <div class="form-group">
+                    <label for="horarioTime">Hora:</label>
+                    <input type="time" id="horarioTime" required>
+                </div>
+                <div class="form-group">
+                    <label for="horarioPrice">Precio Base:</label>
+                    <input type="number" id="horarioPrice" step="0.01" min="0" required>
+                </div>
+                <div class="form-group">
+                    <label for="horarioSeats">Asientos Disponibles:</label>
+                    <input type="number" id="horarioSeats" min="1" required>
+                </div>
+                <div class="form-group">
+                    <div class="checkbox-group">
+                        <label>
+                            <input type="checkbox" id="horario3D">
+                            <span class="checkmark"></span>
+                            Función 3D
+                        </label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="checkbox-group">
+                        <label>
+                            <input type="checkbox" id="horarioIMAX">
+                            <span class="checkmark"></span>
+                            Función IMAX
+                        </label>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="secondary-btn" onclick="closeModal('horarioModal')">Cancelar</button>
+                    <button type="submit" class="primary-btn">Guardar Horario</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal para Crear/Editar Sala -->
+    <div id="salaModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('salaModal')">&times;</span>
+            <h3 id="salaModalTitle"><i class="fas fa-building"></i> Crear Sala</h3>
+            <form id="salaForm">
+                <input type="hidden" id="salaId">
+                <div class="form-group">
+                    <label for="salaName">Nombre de la Sala:</label>
+                    <input type="text" id="salaName" placeholder="Ej: Sala Principal" required>
+                </div>
+                <div class="form-group">
+                    <label for="salaCapacity">Capacidad:</label>
+                    <input type="number" id="salaCapacity" min="1" placeholder="Número de asientos" required>
+                </div>
+                
+                <div class="form-group checkbox-group">
+                    <label class="checkbox-container">
+                        <input type="checkbox" id="salaHas3d">
+                        <span class="checkmark"></span>
+                        Sala 3D
+                    </label>
+                </div>
+                
+                <div class="form-group checkbox-group">
+                    <label class="checkbox-container">
+                        <input type="checkbox" id="salaHasDolby">
+                        <span class="checkmark"></span>
+                        Dolby Atmos
+                    </label>
+                </div>
+                
+                <div class="form-group checkbox-group">
+                    <label class="checkbox-container">
+                        <input type="checkbox" id="salaIsImax">
+                        <span class="checkmark"></span>
+                        IMAX
+                    </label>
+                </div>
+                
+                <div class="modal-actions">
+                    <button type="button" class="secondary-btn" onclick="closeModal('salaModal')">Cancelar</button>
+                    <button type="submit" class="primary-btn">Guardar Sala</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal para Crear/Editar Membresía -->
+    <div id="membresiaModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('membresiaModal')">&times;</span>
+            <h3 id="membresiaModalTitle"><i class="fas fa-id-card"></i> Crear Membresía</h3>
+            <form id="membresiaForm">
+                <input type="hidden" id="membresiaId">
+                <div class="form-group">
+                    <label for="membresiaName">Nombre:</label>
+                    <input type="text" id="membresiaName" placeholder="Ej: Platino" required>
+                </div>
+                <div class="form-group">
+                    <label for="membresiaDescription">Descripción:</label>
+                    <textarea id="membresiaDescription" rows="3" placeholder="Descripción de la membresía" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="membresiaPrice">Precio Mensual:</label>
+                    <input type="number" id="membresiaPrice" step="0.01" min="0" placeholder="0.00" required>
+                </div>
+                <div class="form-group">
+                    <label for="membresiaDiscount">Descuento (%):</label>
+                    <input type="number" id="membresiaDiscount" min="0" max="100" step="0.01" placeholder="0" required>
+                </div>
+                <div class="form-group">
+                    <label for="membresiaBenefits">Beneficios:</label>
+                    <textarea id="membresiaBenefits" rows="2" placeholder="Beneficios adicionales de la membresía"></textarea>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="secondary-btn" onclick="closeModal('membresiaModal')">Cancelar</button>
+                    <button type="submit" class="primary-btn">Guardar Membresía</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmación -->
+    <div id="confirmDeleteModal" class="modal">
+        <div class="modal-content confirm-modal-content">
+            <div class="confirm-header">
+                <i class="fas fa-exclamation-triangle warning-icon"></i>
+                <h3>Confirmar Eliminación</h3>
+            </div>
+            <div class="confirm-body">
+                <p id="confirmMessage">¿Estás seguro de que deseas eliminar este elemento?</p>
+                <p class="confirm-warning">Esta acción no se puede deshacer.</p>
+            </div>
+            <div class="confirm-actions">
+                <button type="button" class="secondary-btn" onclick="closeConfirmModal()">
+                    <i class="fas fa-times"></i> Cancelar
+                </button>
+                <button type="button" class="danger-btn" onclick="confirmDelete()">
+                    <i class="fas fa-trash"></i> Eliminar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="config.js"></script>
+    <script src="utils.js"></script>
     <script src="script.js"></script>
-    <script>
-        // Mejor usar JS para cargar películas al iniciar
-        window.onload = cargarPeliculas;
-    </script>
 </body>
 </html>

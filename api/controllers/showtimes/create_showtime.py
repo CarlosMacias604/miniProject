@@ -5,7 +5,7 @@ import traceback
 def create_showtime_controller(data: dict):
     db = MySQLConnection()
     try:
-        required_fields = ["movie_id", "theater_id", "showtime", "price"]
+        required_fields = ["movie_id", "theater_id", "datetime", "base_price", "available_seats"]
         missing_fields = [
             field for field in required_fields
             if field not in data or data.get(field) is None or data.get(field) == ""
@@ -19,12 +19,12 @@ def create_showtime_controller(data: dict):
                 }
             )
         
-        # Campos válidos para crear showtime
-        valid_fields = ["movie_id", "theater_id", "showtime", "price"]
+        # Campos válidos para crear showtime según la BD
+        valid_fields = ["movie_id", "theater_id", "datetime", "base_price", "available_seats", "is_3d", "is_imax", "created_by_user_id"]
         showtime_data = {k: v for k, v in data.items() if k in valid_fields}
         
         create_showtime(db, **showtime_data)
-        return {"message": "Función creada exitosamente."}
+        return {"message": "Horario creado exitosamente."}
     except HTTPException:
         raise
     except ValueError as ve:

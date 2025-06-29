@@ -22,9 +22,10 @@ def current_user_dep(token: str = Depends(oauth2_scheme)):
 
 @router.get("/all")
 async def get_all_users(
-    data: Dict[str, Any] = Body(...),
+    roles: str = "all",
     current_user: dict = Depends(current_user_dep)
 ):
+    data = {"roles": roles if roles == "all" else roles.split(",")}
     return get_all_users_controller(data)
 
 @router.get("/all_active")

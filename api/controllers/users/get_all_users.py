@@ -19,7 +19,7 @@ def get_all_users_controller(data: dict):
             if invalid_roles:
                 raise HTTPException(status_code=400, detail=f"Roles inválidos: {', '.join(invalid_roles)}. Se aceptan roles: 'admin', 'employee', 'customer'.")
 
-        return get_all_users(db, roles)
+        return {"users": get_all_users(db, roles)}
 
     except HTTPException: # Permite que FastAPI maneje HTTPException correctamente
         raise

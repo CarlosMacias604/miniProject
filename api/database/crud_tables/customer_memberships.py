@@ -81,3 +81,13 @@ def delete_customer_membership_by_id(db: MySQLConnection, customer_membership_id
     """
     db.execute("DELETE FROM customer_memberships WHERE customer_membership_id = %s", (customer_membership_id,))
     db.commit()
+
+def get_customer_membership_by_user_id(db: MySQLConnection, user_id):
+    """
+    Obtiene la membresía activa de un usuario por su user_id.
+    """
+    db.execute(
+        "SELECT * FROM customer_memberships WHERE user_id = %s AND is_active = 1 ORDER BY start_date DESC LIMIT 1", 
+        (user_id,)
+    )
+    return db.fetchone()

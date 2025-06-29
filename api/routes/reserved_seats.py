@@ -17,10 +17,9 @@ def current_user_dep(token: str = Depends(oauth2_scheme)):
 
 @router.get("/all")
 async def get_all_reserved_seats(
-    data: Dict[str, Any] = Body(...),
     current_user: dict = Depends(current_user_dep)
 ):
-    return get_all_reserved_seats_controller(data)
+    return get_all_reserved_seats_controller()
 
 @router.post("/by_id")
 async def get_reserved_seat_by_id(

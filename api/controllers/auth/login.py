@@ -43,6 +43,7 @@ def login_controller(data: dict):
         user_data = {
             "username": username,
             "role": role,
+            "user_id": id_user
         }
         
         return {

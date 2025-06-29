@@ -5,7 +5,7 @@ import traceback
 def create_sale_controller(data: dict):
     db = MySQLConnection()
     try:
-        required_fields = ["user_id", "showtime_id", "quantity", "total_price"]
+        required_fields = ["showtime_id", "ticket_quantity", "total", "payment_method"]
         missing_fields = [
             field for field in required_fields
             if field not in data or data.get(field) is None or data.get(field) == ""
@@ -20,7 +20,11 @@ def create_sale_controller(data: dict):
             )
         
         # Campos válidos para crear venta
-        valid_fields = ["user_id", "showtime_id", "quantity", "total_price", "sale_date"]
+        valid_fields = [
+            "showtime_id", "customer_user_id", "employee_user_id", 
+            "ticket_quantity", "subtotal", "discount_amount", "total", 
+            "payment_method", "sale_date"
+        ]
         sale_data = {k: v for k, v in data.items() if k in valid_fields}
         
         create_sale(db, **sale_data)

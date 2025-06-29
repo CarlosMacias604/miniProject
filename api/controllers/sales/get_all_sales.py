@@ -2,7 +2,7 @@ from fastapi import HTTPException
 from database.crud_tables.sales import get_all_sales, MySQLConnection
 import traceback
 
-def get_all_sales_controller(data: dict):
+def get_all_sales_controller():
     db = MySQLConnection()
     try:
         sales = get_all_sales(db)

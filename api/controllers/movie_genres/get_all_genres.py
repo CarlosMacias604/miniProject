@@ -2,7 +2,7 @@ from fastapi import HTTPException
 from database.crud_tables.genres import get_all_genres, MySQLConnection
 import traceback
 
-def get_all_genres_controller(data: dict):
+def get_all_genres_controller():
     db = MySQLConnection()
     try:
         genres = get_all_genres(db)

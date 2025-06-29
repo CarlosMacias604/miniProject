@@ -2,7 +2,7 @@ from fastapi import HTTPException
 from database.crud_tables.movies import get_all_movies, MySQLConnection
 import traceback
 
-def get_all_movies_controller(data: dict):
+def get_all_movies_controller():
     db = MySQLConnection()
     try:
         movies = get_all_movies(db)

@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CINEMAX - Instrucciones de Instalación</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #2d0b0b 0%, #7b1f1f 100%);
+            color: white;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .logo {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #ff5252;
+            margin-bottom: 10px;
+        }
+        .section {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 82, 82, 0.3);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .section h2 {
+            color: #ff5252;
+            border-bottom: 2px solid #ff5252;
+            padding-bottom: 10px;
+        }
+        code {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+        }
+        .code-block {
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid #ff5252;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+            overflow-x: auto;
+        }
+        .warning {
+            background: rgba(255, 193, 7, 0.2);
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        .success {
+            background: rgba(76, 175, 80, 0.2);
+            border-left: 4px solid #4caf50;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        ul {
+            padding-left: 20px;
+        }
+        li {
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">🎬 CINEMAX</div>
+        <p>Guía de Instalación y Configuración</p>
+    </div>
+
+    <div class="section">
+        <h2>📋 Prerrequisitos</h2>
+        <ul>
+            <li><strong>Python 3.8+</strong> - Para el backend FastAPI</li>
+            <li><strong>MySQL 8.0+</strong> - Base de datos</li>
+            <li><strong>VS Code con Live Server</strong> - Para servir el frontend</li>
+            <li><strong>Git</strong> - Para control de versiones (opcional)</li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <h2>🚀 Instalación Rápida</h2>
+        
+        <h3>1. Configurar Base de Datos</h3>
+        <div class="code-block">
+-- Crear base de datos en MySQL
+CREATE DATABASE cine;
+USE cine;
+
+-- Ejecutar scripts de creación de tablas
+-- (Ver carpeta database/sql/)
+        </div>
+
+        <h3>2. Configurar Backend</h3>
+        <p>Navegar al directorio <code>api/</code> y ejecutar:</p>
+        
+        <h4>En Windows:</h4>
+        <div class="code-block">start_server.bat</div>
+        
+        <h4>En Linux/Mac:</h4>
+        <div class="code-block">chmod +x start_server.sh
+./start_server.sh</div>
+
+        <h3>3. Configurar Frontend</h3>
+        <ul>
+            <li>Abrir VS Code en el directorio <code>frontend/</code></li>
+            <li>Instalar la extensión "Live Server"</li>
+            <li>Click derecho en <code>index.html</code> → "Open with Live Server"</li>
+            <li>Debe abrir en: <code>http://localhost:5500</code></li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <h2>⚙️ Configuración Manual</h2>
+        
+        <h3>Variables de Entorno</h3>
+        <div class="code-block">
+# Backend (.env o variables del sistema)
+MYSQL_HOST=localhost
+MYSQL_USER=root
+MYSQL_PASSWORD=root
+MYSQL_DATABASE=cine
+        </div>
+
+        <h3>Instalación de Dependencias Python</h3>
+        <div class="code-block">
+pip install fastapi uvicorn mysql-connector-python python-jose[cryptography] passlib[bcrypt] python-multipart
+        </div>
+
+        <h3>Ejecutar Backend Manualmente</h3>
+        <div class="code-block">
+cd api/
+uvicorn main:app --reload --host 0.0.0.0 --port 8000
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>🔧 Configuración del Frontend</h2>
+        
+        <p>El frontend se configura mediante los archivos:</p>
+        <ul>
+            <li><code>config.js</code> - Configuración general</li>
+            <li><code>utils.js</code> - Funciones utilitarias</li>
+            <li><code>script.js</code> - Lógica principal</li>
+        </ul>
+
+        <h3>Modificar URL de la API</h3>
+        <p>En <code>config.js</code>, cambiar:</p>
+        <div class="code-block">
+const CONFIG = {
+    API: {
+        BASE_URL: 'http://localhost:8000',  // Cambiar si es necesario
+        // ...
+    }
+};
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>🌐 URLs de Acceso</h2>
+        <ul>
+            <li><strong>Frontend:</strong> <a href="http://localhost:5500" target="_blank">http://localhost:5500</a></li>
+            <li><strong>API Backend:</strong> <a href="http://localhost:8000" target="_blank">http://localhost:8000</a></li>
+            <li><strong>Documentación API:</strong> <a href="http://localhost:8000/docs" target="_blank">http://localhost:8000/docs</a></li>
+            <li><strong>API Alternativa:</strong> <a href="http://localhost:8000/redoc" target="_blank">http://localhost:8000/redoc</a></li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <h2>🎯 Características Implementadas</h2>
+        <ul>
+            <li>✅ Sistema de autenticación JWT</li>
+            <li>✅ Cartelera de películas con imágenes TMDB</li>
+            <li>✅ Búsqueda de películas</li>
+            <li>✅ Visualización de horarios</li>
+            <li>✅ Selección interactiva de asientos</li>
+            <li>✅ Proceso de compra completo</li>
+            <li>✅ Perfil de usuario y estadísticas</li>
+            <li>✅ Historial de compras</li>
+            <li>✅ Notificaciones del sistema</li>
+            <li>✅ Diseño responsive</li>
+        </ul>
+    </div>
+
+    <div class="warning">
+        <strong>⚠️ Importante:</strong> Asegúrate de que MySQL esté corriendo y la base de datos <code>cine</code> esté creada con todas las tablas antes de iniciar el backend.
+    </div>
+
+    <div class="success">
+        <strong>✅ ¡Listo!</strong> Una vez configurado todo, podrás acceder al sistema completo y comenzar a usar CINEMAX.
+    </div>
+
+    <div class="section">
+        <h2>🐛 Resolución de Problemas</h2>
+        
+        <h3>Error de conexión a MySQL</h3>
+        <ul>
+            <li>Verificar que MySQL esté corriendo</li>
+            <li>Verificar credenciales en variables de entorno</li>
+            <li>Asegurarse de que la base de datos <code>cine</code> existe</li>
+        </ul>
+
+        <h3>Error CORS en el frontend</h3>
+        <ul>
+            <li>Asegurarse de usar Live Server (no abrir el HTML directamente)</li>
+            <li>Verificar que el backend esté corriendo en puerto 8000</li>
+        </ul>
+
+        <h3>Error de autenticación</h3>
+        <ul>
+            <li>Verificar que la tabla <code>users</code> tenga datos</li>
+            <li>Crear un usuario de prueba en la base de datos</li>
+        </ul>
+    </div>
+</body>
+</html>

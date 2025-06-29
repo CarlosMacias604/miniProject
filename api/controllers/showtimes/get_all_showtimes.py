@@ -2,7 +2,7 @@ from fastapi import HTTPException
 from database.crud_tables.showtimes import get_all_showtimes, MySQLConnection
 import traceback
 
-def get_all_showtimes_controller(data: dict):
+def get_all_showtimes_controller():
     db = MySQLConnection()
     try:
         showtimes = get_all_showtimes(db)

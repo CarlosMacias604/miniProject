@@ -17,10 +17,9 @@ def current_user_dep(token: str = Depends(oauth2_scheme)):
 
 @router.get("/all")
 async def get_all_customer_memberships(
-    data: Dict[str, Any] = Body(...),
     current_user: dict = Depends(current_user_dep)
 ):
-    return get_all_customer_memberships_controller(data)
+    return get_all_customer_memberships_controller()
 
 @router.post("/by_id")
 async def get_customer_membership_by_id(
@@ -28,6 +27,14 @@ async def get_customer_membership_by_id(
     current_user: dict = Depends(current_user_dep)
 ):
     return get_customer_membership_by_id_controller(data)
+
+@router.post("/by_user_id")
+async def get_customer_membership_by_user_id(
+    data: Dict[str, Any] = Body(...),
+    current_user: dict = Depends(current_user_dep)
+):
+    from controllers.customer_memberships.get_customer_membership_by_user_id import get_customer_membership_by_user_id_controller
+    return get_customer_membership_by_user_id_controller(data)
 
 @router.post("/create")
 async def create_customer_membership(

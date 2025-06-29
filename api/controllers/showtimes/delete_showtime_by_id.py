@@ -22,7 +22,7 @@ def delete_showtime_by_id_controller(data: dict):
         showtime_id = data.get("showtime_id")
         delete_showtime_by_id(db, showtime_id)
         
-        return {"message": "Función eliminada exitosamente."}
+        return {"message": "Horario eliminado exitosamente."}
     except HTTPException:
         raise
     except Exception as e:

@@ -2,7 +2,7 @@ from fastapi import HTTPException
 from database.crud_tables.reserved_seats import get_all_reserved_seats, MySQLConnection
 import traceback
 
-def get_all_reserved_seats_controller(data: dict):
+def get_all_reserved_seats_controller():
     db = MySQLConnection()
     try:
         reserved_seats = get_all_reserved_seats(db)

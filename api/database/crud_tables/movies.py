@@ -33,6 +33,9 @@ def update_movie_by_id(db: MySQLConnection, movie_id, **kwargs):
     db.commit()
 
 def delete_movie_by_id(db: MySQLConnection, movie_id):
+    # Primero eliminar las relaciones en movie_genres para evitar restricciones de llaves foráneas
+    db.execute("DELETE FROM movie_genres WHERE movie_id = %s", (movie_id,))
+    # Luego eliminar la película
     db.execute("DELETE FROM movies WHERE id = %s", (movie_id,))
     db.commit()
 
