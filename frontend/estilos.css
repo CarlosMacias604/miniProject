@@ -533,6 +533,94 @@ body, html {
     border-left: 4px solid var(--primary-red);
 }
 
+.history-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.sale-id {
+    font-weight: bold;
+    color: var(--primary-red);
+    font-size: 1rem;
+}
+
+.sale-date {
+    color: var(--text-gray);
+    font-size: 0.9rem;
+}
+
+.history-details {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 1rem;
+}
+
+.sale-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    flex-grow: 1;
+}
+
+.movie-title {
+    font-weight: bold;
+    color: var(--text-white);
+    font-size: 0.95rem;
+}
+
+.showtime-info {
+    color: var(--text-gray);
+    font-size: 0.85rem;
+}
+
+.seats-info {
+    color: var(--text-gray);
+    font-size: 0.8rem;
+}
+
+.sale-summary {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.5rem;
+}
+
+.sale-amount {
+    font-weight: bold;
+    color: var(--primary-red);
+    font-size: 1.1rem;
+}
+
+.sale-tickets {
+    color: var(--text-gray);
+    font-size: 0.85rem;
+}
+
+.btn-small {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.8rem;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    transition: all 0.3s ease;
+}
+
+.btn-small.btn-primary {
+    background: var(--primary-red);
+    color: white;
+}
+
+.btn-small.btn-primary:hover {
+    background: #e04848;
+    transform: translateY(-1px);
+}
+
 .history-item h5 {
     margin-bottom: 0.5rem;
 }
@@ -2554,5 +2642,31 @@ button:focus, input:focus, .seat:focus {
         width: 100%;
         justify-content: center;
     }
+}
+
+/* Estilos para acciones del ticket */
+.ticket-actions {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.ticket-actions .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.8rem 1.5rem;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.ticket-actions .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(255, 82, 82, 0.3);
 }
 

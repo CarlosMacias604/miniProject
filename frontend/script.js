@@ -225,7 +225,11 @@ async function iniciarSesion() {
             Utils.storage.set(CONFIG.STORAGE.KEYS.CURRENT_USER, currentUser);
             
             showNotification(CONFIG.MESSAGES.SUCCESS.LOGIN, 'success');
-            showMainApp(true); // Forzar redirección después del login
+            
+            // Dar un pequeño delay para asegurar que el token se guarde correctamente
+            setTimeout(() => {
+                showMainApp(true); // Forzar redirección después del login
+            }, 100);
         }
     } catch (error) {
         showNotification(CONFIG.MESSAGES.ERROR.LOGIN_FAILED + ': ' + error.message, 'error');
@@ -237,6 +241,8 @@ function cerrarSesion() {
     Utils.storage.remove(CONFIG.STORAGE.KEYS.REFRESH_TOKEN);
     Utils.storage.remove(CONFIG.STORAGE.KEYS.CURRENT_USER);
     currentUser = null;
+    movies = []; // Limpiar películas
+    carteleraCargada = false; // Resetear estado de carga
     
     // Ocultar todas las secciones principales
     document.querySelectorAll('.main-section').forEach(section => {
@@ -263,10 +269,9 @@ function showMainApp(forceRedirectToCartelera = false) {
     configureNavigationByRole();
 
     if (forceRedirectToCartelera) {
-        if (!carteleraCargada) {
-            showSection('cartelera');
-            carteleraCargada = true;
-        }
+        // Forzar mostrar cartelera después del login
+        showSection('cartelera');
+        carteleraCargada = true;
     } else {
         const activeSections = document.querySelectorAll('.main-section[style*="display: block"], .main-section:not([style*="display: none"])');
         const visibleSection = Array.from(activeSections).find(section =>
@@ -275,7 +280,8 @@ function showMainApp(forceRedirectToCartelera = false) {
             !section.style.display.includes('none')
         );
 
-        if (!visibleSection && !carteleraCargada) {
+        if (!visibleSection) {
+            // Si no hay sección visible, mostrar cartelera por defecto
             showSection('cartelera');
             carteleraCargada = true;
         }
@@ -309,6 +315,8 @@ function configureNavigationByRole() {
 
 // Actualizar showSection para manejar las nuevas secciones
 function showSection(section, event) {
+    console.log('📄 Mostrando sección:', section);
+    
     // Ocultar todas las secciones
     document.querySelectorAll('.main-section').forEach(sec => {
         sec.style.display = 'none';
@@ -320,9 +328,15 @@ function showSection(section, event) {
     });
     
     // Mostrar sección seleccionada
-    document.getElementById(section + 'Section').style.display = 'block';
+    const sectionElement = document.getElementById(section + 'Section');
+    if (sectionElement) {
+        sectionElement.style.display = 'block';
+        console.log('✅ Sección mostrada:', section + 'Section');
+    } else {
+        console.error('❌ No se encontró el elemento:', section + 'Section');
+    }
     
-    // Activar botón correspondiente solo si hay evento
+    // Activar botón correspondiente
     if (event && event.target) {
         event.target.classList.add('active');
     } else {
@@ -330,12 +344,14 @@ function showSection(section, event) {
         const defaultBtn = document.querySelector(`[onclick*="${section}"]`);
         if (defaultBtn) {
             defaultBtn.classList.add('active');
+            console.log('✅ Botón activado:', defaultBtn);
         }
     }
     
     // Cargar datos según la sección
     switch(section) {
         case 'cartelera':
+            console.log('🎬 Cargando películas...');
             cargarPeliculas();
             break;
         case 'perfil':
@@ -362,28 +378,40 @@ function showSection(section, event) {
         case 'membresiasCustomer':
             cargarMembresiasCustomer();
             break;
+        default:
+            console.log('ℹ️ Sección sin carga de datos especial:', section);
     }
 }
 
 // Funciones de Películas
 async function cargarPeliculas() {
+    console.log('🎬 Intentando cargar películas...');
+    
     // Verificar que hay token antes de hacer peticiones
     const token = Utils.storage.get(CONFIG.STORAGE.KEYS.AUTH_TOKEN);
     if (!token) {
         console.log('❌ No hay token para cargar películas');
+        showNotification('No hay token de autenticación', 'error');
         return;
     }
+    
+    console.log('✅ Token encontrado, haciendo petición...');
     
     try {
         const response = await APIClient.get('/movies/all');
         const allMovies = response.movies || [];
         
+        console.log('🎬 Películas cargadas:', allMovies.length);
+        
         // Limitar a solo 8 películas para la cartelera
         movies = allMovies.slice(0, 8);
         mostrarPeliculas(movies);
+        
+        console.log('✅ Películas mostradas en la interfaz');
+        
     } catch (error) {
-        console.log('Error al cargar películas:', error);
-        showNotification('Error al cargar películas', 'error');
+        console.error('❌ Error al cargar películas:', error);
+        showNotification('Error al cargar películas: ' + error.message, 'error');
         
         // Si es error de token, limpiar sesión
         if (error.message.includes('Invalid token') || error.message.includes('Unauthorized')) {
@@ -564,9 +592,16 @@ async function cargarAsientos() {
         const response = await APIClient.get('/reserved_seats/all');
         const reservedSeats = response.reserved_seats || [];
         
-        // Filtrar asientos reservados para este showtime
+        // Filtrar asientos reservados para este showtime específico
+        // Necesitamos obtener las ventas para este showtime y luego los asientos reservados
+        const salesResponse = await APIClient.get('/sales/all');
+        const allSales = salesResponse.sales || [];
+        const showtimeSales = allSales.filter(sale => sale.showtime_id === selectedShowtime.showtime_id);
+        const saleIds = showtimeSales.map(sale => sale.sale_id);
+        
+        // Filtrar asientos reservados que pertenecen a ventas de este showtime
         const showtimeReservedSeats = reservedSeats.filter(seat => 
-            seat.showtime_id === selectedShowtime.id
+            saleIds.includes(seat.sale_id)
         );
         
         generarAsientos(showtimeReservedSeats);
@@ -582,8 +617,9 @@ function generarAsientos(reservedSeats = []) {
     const rows = 8; // Filas A-H
     const seatsPerRow = 12; // 12 asientos por fila
     
+    // Crear un Set con los asientos reservados usando el campo seat_number directamente
     const reservedSeatsSet = new Set(
-        reservedSeats.map(seat => `${seat.row}${seat.seat_number}`)
+        reservedSeats.map(seat => seat.seat_number)
     );
     
     let seatsHTML = '';
@@ -686,53 +722,81 @@ async function confirmarCompra() {
             payment_method: 'credit_card'
         });
         
-        const saleId = saleResponse.sale_id;
+        // Obtener el ID de la venta recién creada
+        const salesListResponse = await APIClient.get('/sales/all');
+        const allSales = salesListResponse.sales || [];
+        
+        // Encontrar la venta más reciente del usuario actual
+        const userSales = allSales.filter(sale => 
+            sale.customer_user_id === currentUser.user_id
+        ).sort((a, b) => new Date(b.sale_date) - new Date(a.sale_date));
+        
+        const saleId = userSales[0]?.sale_id;
+        
+        if (!saleId) {
+            throw new Error('No se pudo obtener el ID de la venta');
+        }
         
         // Reservar asientos
         for (const seatId of selectedSeats) {
-            const rowLetter = seatId.charAt(0);
-            const seatNumber = parseInt(seatId.slice(1));
-            
             await APIClient.post('/reserved_seats/create', {
-                showtime_id: selectedShowtime.id,
                 sale_id: saleId,
-                row: rowLetter,
-                seat_number: seatNumber
+                seat_number: seatId  // Enviar el asiento completo como "A5", "B12", etc.
             });
         }
         
-        // Mostrar confirmación
-        mostrarConfirmacionCompra(saleId, totalAmount);
+        // Mostrar confirmación con opción de generar PDF
+        mostrarConfirmacionCompra(saleId, totalAmount, selectedSeats);
         
     } catch (error) {
+        console.error('Error detallado:', error);
         showNotification('Error al procesar la compra: ' + error.message, 'error');
     }
 }
 
-function mostrarConfirmacionCompra(saleId, totalAmount) {
+function mostrarConfirmacionCompra(saleId, totalAmount, seats) {
     const ticketInfo = document.getElementById('ticketInfo');
+    
+    // Formatear fecha y hora del showtime
+    const showDate = selectedShowtime ? 
+        (selectedShowtime.datetime ? 
+            new Date(selectedShowtime.datetime).toLocaleDateString('es-ES') : 
+            (selectedShowtime.date || 'Fecha no disponible')
+        ) : 'Fecha no disponible';
+    
+    const showTime = selectedShowtime ? 
+        (selectedShowtime.datetime ? 
+            new Date(selectedShowtime.datetime).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }) : 
+            (selectedShowtime.time || 'Hora no disponible')
+        ) : 'Hora no disponible';
     
     ticketInfo.innerHTML = `
         <div class="ticket-item">
             <strong>Número de Venta:</strong> ${saleId}
         </div>
         <div class="ticket-item">
-            <strong>Película:</strong> ${currentMovie.title}
+            <strong>Película:</strong> ${currentMovie?.title || 'No disponible'}
         </div>
         <div class="ticket-item">
-            <strong>Fecha:</strong> ${formatDate(selectedShowtime.date)}
+            <strong>Fecha:</strong> ${showDate}
         </div>
         <div class="ticket-item">
-            <strong>Hora:</strong> ${formatTime(selectedShowtime.time)}
+            <strong>Hora:</strong> ${showTime}
         </div>
         <div class="ticket-item">
-            <strong>Sala:</strong> ${selectedShowtime.theater_name || selectedShowtime.theater_id}
+            <strong>Sala:</strong> ${selectedShowtime?.theater_name || `Sala ${selectedShowtime?.theater_id}` || 'No disponible'}
         </div>
         <div class="ticket-item">
-            <strong>Asientos:</strong> ${selectedSeats.join(', ')}
+            <strong>Asientos:</strong> ${seats.join(', ')}
         </div>
         <div class="ticket-item">
             <strong>Total Pagado:</strong> ${formatCurrency(totalAmount)}
+        </div>
+        <div class="ticket-actions" style="margin-top: 20px;">
+            <button onclick="generarPDFTicketDirecto(${saleId}, ${totalAmount}, '${seats.join(', ')}')" 
+                    class="btn btn-primary">
+                <i class="fas fa-download"></i> Descargar Ticket PDF
+            </button>
         </div>
     `;
     
@@ -785,8 +849,18 @@ async function cargarEstadisticasPerfil() {
 
 async function cargarHistorialCompras() {
     try {
-        const response = await APIClient.get('/sales/all');
-        const allSales = response.sales || [];
+        // Cargar todos los datos necesarios de una vez
+        const [salesResponse, showtimesResponse, moviesResponse, reservedSeatsResponse] = await Promise.all([
+            APIClient.get('/sales/all'),
+            APIClient.get('/showtimes/all'),
+            APIClient.get('/movies/all'),
+            APIClient.get('/reserved_seats/all')
+        ]);
+        
+        const allSales = salesResponse.sales || [];
+        const allShowtimes = showtimesResponse.showtimes || [];
+        const allMovies = moviesResponse.movies || [];
+        const allReservedSeats = reservedSeatsResponse.reserved_seats || [];
         
         // Filtrar ventas del usuario actual
         const userSales = allSales.filter(sale => sale.customer_user_id === currentUser.user_id);
@@ -801,21 +875,55 @@ async function cargarHistorialCompras() {
         // Ordenar por fecha más reciente
         userSales.sort((a, b) => new Date(b.sale_date) - new Date(a.sale_date));
         
-        historyContainer.innerHTML = userSales.map(sale => `
+        // Procesar información adicional para cada venta (sin más llamadas API)
+        const salesWithDetails = userSales.map(sale => {
+            // Encontrar showtime
+            const showtime = allShowtimes.find(st => st.showtime_id === sale.showtime_id);
+            
+            // Encontrar película
+            const movie = showtime ? allMovies.find(m => m.id === showtime.movie_id) : null;
+            
+            // Encontrar asientos reservados
+            const saleSeats = allReservedSeats.filter(seat => seat.sale_id === sale.sale_id);
+            
+            return {
+                ...sale,
+                showtime,
+                movie,
+                seats: saleSeats
+            };
+        });
+        
+        historyContainer.innerHTML = salesWithDetails.map(sale => `
             <div class="history-item">
                 <div class="history-header">
                     <span class="sale-id">#${sale.sale_id}</span>
                     <span class="sale-date">${Utils.format.date(sale.sale_date)}</span>
                 </div>
                 <div class="history-details">
-                    <span class="sale-amount">${Utils.format.currency(sale.total)}</span>
-                    <span class="sale-tickets">${sale.ticket_quantity} boletos</span>
+                    <div class="sale-info">
+                        <span class="movie-title">${sale.movie ? sale.movie.title : 'Película no disponible'}</span>
+                        <span class="showtime-info">
+                            ${sale.showtime ? (formatDate(sale.showtime.date) + ' - ' + formatTime(sale.showtime.time)) : 'Función no disponible'}
+                        </span>
+                        <span class="seats-info">
+                            Asientos: ${sale.seats && sale.seats.length > 0 ? sale.seats.map(s => s.seat_number).join(', ') : 'N/A'}
+                        </span>
+                    </div>
+                    <div class="sale-summary">
+                        <span class="sale-amount">${Utils.format.currency(sale.total)}</span>
+                        <span class="sale-tickets">${sale.ticket_quantity} boletos</span>
+                        <button onclick="generarPDFHistorial(${sale.sale_id})" class="btn-small btn-primary">
+                            <i class="fas fa-download"></i> PDF
+                        </button>
+                    </div>
                 </div>
             </div>
         `).join('');
         
     } catch (error) {
         console.error('Error al cargar historial:', error);
+        document.getElementById('purchaseHistory').innerHTML = '<div class="no-history">Error al cargar el historial</div>';
     }
 }
 
@@ -1900,6 +2008,7 @@ function mostrarConfirmacionCompra(titulo, mensaje, precio, onConfirm) {
     // Función para cerrar el modal de forma segura
     const closeModal = () => {
         if (modal && modal.parentNode) {
+                      
             modal.parentNode.removeChild(modal);
         }
     };
@@ -1933,6 +2042,248 @@ function mostrarConfirmacionCompra(titulo, mensaje, precio, onConfirm) {
     document.addEventListener('keydown', handleEsc);
 }
 
+// Función para generar PDF directamente después de la compra (con datos actuales)
+function generarPDFTicketDirecto(saleId, totalAmount, seatsString) {
+    try {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        
+        const primaryColor = [255, 82, 82];
+        const textColor = [51, 51, 51];
+        const backgroundColor = [245, 245, 245];
+        
+        // Header
+        doc.setFillColor(...primaryColor);
+        doc.rect(0, 0, 210, 40, 'F');
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(24);
+        doc.setFont('helvetica', 'bold');
+        doc.text('CINEMAX', 105, 20, { align: 'center' });
+        doc.setFontSize(12);
+        doc.setFont('helvetica', 'normal');
+        doc.text('Vive la experiencia del cine moderno', 105, 30, { align: 'center' });
+        
+        // Título
+        doc.setTextColor(...textColor);
+        doc.setFontSize(20);
+        doc.setFont('helvetica', 'bold');
+        doc.text('TICKET DE COMPRA', 105, 55, { align: 'center' });
+        
+        // Contenido
+        doc.setFontSize(12);
+        doc.setFont('helvetica', 'normal');
+        let yPosition = 75;
+        const lineHeight = 8;
+        
+        const showDate = selectedShowtime?.datetime ? 
+            new Date(selectedShowtime.datetime).toLocaleDateString('es-ES') : 
+            (selectedShowtime?.date || 'Fecha no disponible');
+        
+        const showTime = selectedShowtime?.datetime ? 
+            new Date(selectedShowtime.datetime).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }) : 
+            (selectedShowtime?.time || 'Hora no disponible');
+        
+        const ticketData = [
+            ['Número de Venta:', `#${saleId}`],
+            ['Cliente:', currentUser?.username || 'Cliente'],
+            ['Película:', currentMovie?.title || 'Película no disponible'],
+            ['Fecha de Función:', showDate],
+            ['Hora de Función:', showTime],
+            ['Sala:', selectedShowtime?.theater_name || `Sala ${selectedShowtime?.theater_id}` || 'Sala no disponible'],
+            ['Asientos:', seatsString],
+            ['Cantidad de Boletos:', (seatsString.split(', ').length).toString()],
+            ['Total Pagado:', formatCurrency(totalAmount)]
+        ];
+        
+        ticketData.forEach(([label, value]) => {
+            doc.setFont('helvetica', 'bold');
+            doc.text(label, 20, yPosition);
+            doc.setFont('helvetica', 'normal');
+            doc.text(value, 80, yPosition);
+            yPosition += lineHeight;
+        });
+        
+        // Footer
+        yPosition += 10;
+        doc.setDrawColor(...primaryColor);
+        doc.setLineWidth(1);
+        doc.line(20, yPosition, 190, yPosition);
+        yPosition += 15;
+        doc.setFontSize(10);
+        doc.setTextColor(100, 100, 100);
+        doc.text('Fecha de Compra: ' + new Date().toLocaleString('es-ES'), 20, yPosition);
+        
+        const fileName = `CINEMAX_Ticket_${saleId}_${new Date().toISOString().split('T')[0]}.pdf`;
+        doc.save(fileName);
+        showNotification('PDF generado exitosamente', 'success');
+        
+    } catch (error) {
+        console.error('Error al generar PDF:', error);
+        showNotification('Error al generar el PDF: ' + error.message, 'error');
+    }
+}
+
+// Función para generar PDF desde el historial de compras
+async function generarPDFHistorial(saleId) {
+    try {
+        // Obtener información detallada de la venta usando los endpoints
+        const [salesResponse, showtimesResponse, moviesResponse, reservedSeatsResponse] = await Promise.all([
+            APIClient.get('/sales/all'),
+            APIClient.get('/showtimes/all'),
+            APIClient.get('/movies/all'),
+            APIClient.get('/reserved_seats/all')
+        ]);
+        
+        const allSales = salesResponse.sales || [];
+        const allShowtimes = showtimesResponse.showtimes || [];
+        const allMovies = moviesResponse.movies || [];
+        const allReservedSeats = reservedSeatsResponse.reserved_seats || [];
+        
+        const sale = allSales.find(s => s.sale_id === saleId);
+        if (!sale) {
+            showNotification('No se encontró la información de la venta', 'error');
+            return;
+        }
+        
+        const showtime = allShowtimes.find(st => st.showtime_id === sale.showtime_id);
+        const movie = showtime ? allMovies.find(m => m.id === showtime.movie_id) : null;
+        const saleSeats = allReservedSeats.filter(seat => seat.sale_id === saleId);
+        const seatsString = saleSeats.map(s => s.seat_number).join(', ');
+        
+        // Generar PDF con la información
+        generarPDFTicketCompleto(sale, movie, showtime, seatsString);
+        
+    } catch (error) {
+        console.error('Error al generar PDF del historial:', error);
+        showNotification('Error al generar el PDF: ' + error.message, 'error');
+    }
+}
+
+// Función para generar PDF completo de la venta (historial)
+function generarPDFTicketCompleto(sale, movie, showtime, seatsString) {
+    try {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        
+        const primaryColor = [255, 82, 82];
+        const textColor = [51, 51, 51];
+        const backgroundColor = [245, 245, 245];
+        
+        // Header
+        doc.setFillColor(...primaryColor);
+        doc.rect(0, 0, 210, 40, 'F');
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(24);
+        doc.setFont('helvetica', 'bold');
+        doc.text('CINEMAX', 105, 20, { align: 'center' });
+        doc.setFontSize(12);
+        doc.setFont('helvetica', 'normal');
+        doc.text('Vive la experiencia del cine moderno', 105, 30, { align: 'center' });
+        
+        // Título
+        doc.setTextColor(...textColor);
+        doc.setFontSize(20);
+        doc.setFont('helvetica', 'bold');
+        doc.text('TICKET DE COMPRA', 105, 55, { align: 'center' });
+        
+        // Contenido
+        doc.setFontSize(12);
+        doc.setFont('helvetica', 'normal');
+        let yPosition = 75;
+        const lineHeight = 8;
+        
+        const showDate = showtime?.datetime ? 
+            new Date(showtime.datetime).toLocaleDateString('es-ES') : 
+            (showtime?.date || 'Fecha no disponible');
+        
+        const showTime = showtime?.datetime ? 
+            new Date(showtime.datetime).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }) : 
+            (showtime?.time || 'Hora no disponible');
+        
+        const ticketData = [
+            ['Número de Venta:', `#${sale.sale_id}`],
+            ['Cliente:', currentUser?.username || 'Cliente'],
+            ['Película:', movie?.title || 'Película no disponible'],
+            ['Fecha de Función:', showDate],
+            ['Hora de Función:', showTime],
+            ['Sala:', showtime?.theater_name || `Sala ${showtime?.theater_id}` || 'Sala no disponible'],
+            ['Asientos:', seatsString],
+            ['Cantidad de Boletos:', (seatsString.split(', ').length).toString()],
+            ['Subtotal:', formatCurrency(sale.subtotal)],
+            ['Descuento:', formatCurrency(sale.discount_amount || 0)],
+            ['Total Pagado:', formatCurrency(sale.total)]
+        ];
+        
+        ticketData.forEach(([label, value]) => {
+            doc.setFont('helvetica', 'bold');
+            doc.text(label, 20, yPosition);
+            doc.setFont('helvetica', 'normal');
+            doc.text(value, 80, yPosition);
+            yPosition += lineHeight;
+        });
+        
+        // Línea separadora
+        yPosition += 10;
+        doc.setDrawColor(...primaryColor);
+        doc.setLineWidth(1);
+        doc.line(20, yPosition, 190, yPosition);
+        
+        // Información adicional
+        yPosition += 15;
+        doc.setFontSize(10);
+        doc.setTextColor(100, 100, 100);
+        doc.text('Fecha de Compra: ' + new Date().toLocaleString('es-ES'), 20, yPosition);
+        yPosition += 6;
+        doc.text('Método de Pago: Tarjeta de Crédito', 20, yPosition);
+        
+        // Código QR simulado (rectángulo como placeholder)
+        yPosition += 15;
+        doc.setFillColor(200, 200, 200);
+        doc.rect(20, yPosition, 25, 25, 'F');
+        doc.setTextColor(...textColor);
+        doc.setFontSize(8);
+        doc.text('QR Code', 32.5, yPosition + 13, { align: 'center' });
+        
+        // Términos y condiciones
+        yPosition += 35;
+        doc.setFontSize(8);
+        doc.setTextColor(120, 120, 120);
+        const terms = [
+            '• Presente este ticket en taquilla para validar su entrada',
+            '• Llegue 15 minutos antes del inicio de la función',
+            '• No se permiten reembolsos una vez iniciada la función',
+            '• Conserve este ticket durante toda la función'
+        ];
+        
+        terms.forEach(term => {
+            doc.text(term, 20, yPosition);
+            yPosition += 5;
+        });
+        
+        // Footer
+        yPosition += 10;
+        doc.setFillColor(...backgroundColor);
+        doc.rect(0, yPosition, 210, 30, 'F');
+        
+        doc.setTextColor(...primaryColor);
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'bold');
+        doc.text('¡Gracias por elegir CINEMAX!', 105, yPosition + 15, { align: 'center' });
+        doc.setFont('helvetica', 'normal');
+        doc.text('Disfrute su película', 105, yPosition + 22, { align: 'center' });
+        
+        // Descargar el PDF
+        const fileName = `CINEMAX_Ticket_${sale.sale_id}_${new Date().toISOString().split('T')[0]}.pdf`;
+        doc.save(fileName);
+        
+        showNotification('PDF generado exitosamente', 'success');
+        
+    } catch (error) {
+        console.error('Error al generar PDF:', error);
+        showNotification('Error al generar el PDF: ' + error.message, 'error');
+    }
+}
+
 // Event Listeners
 // Inicializar la aplicación cuando se cargue la página
 document.addEventListener('DOMContentLoaded', function() {
@@ -1945,7 +2296,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (token && savedUser) {
         currentUser = savedUser;
         console.log('Usuario autenticado encontrado:', currentUser.username);
-        showMainApp();
+        showMainApp(true); // Forzar carga de cartelera también en sesión persistente
     } else {
         // Limpiar cualquier dato de sesión corrupto
         Utils.storage.remove(CONFIG.STORAGE.KEYS.AUTH_TOKEN);
@@ -2475,4 +2826,130 @@ function mostrarTablaMembresias(memberships) {
     `;
     
     container.innerHTML = tableHTML;
+}
+
+// Función para generar PDF del ticket de compra
+function generarPDFTicket(saleId, totalAmount, seatsString) {
+    try {
+        // Inicializar jsPDF
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        
+        // Configurar colores y fuentes
+        const primaryColor = [255, 82, 82]; // Color rojo del tema #ff5252
+        const textColor = [51, 51, 51]; // Color gris oscuro
+        const backgroundColor = [245, 245, 245]; // Gris claro
+        
+        // Título del documento
+        doc.setFillColor(...primaryColor);
+        doc.rect(0, 0, 210, 40, 'F'); // Header rojo
+        
+        doc.setTextColor(255, 255, 255); // Texto blanco
+        doc.setFontSize(24);
+        doc.setFont('helvetica', 'bold');
+        doc.text('CINEMAX', 105, 20, { align: 'center' });
+        
+        doc.setFontSize(12);
+        doc.setFont('helvetica', 'normal');
+        doc.text('Vive la experiencia del cine moderno', 105, 30, { align: 'center' });
+        
+        // Título del ticket
+        doc.setTextColor(...textColor);
+        doc.setFontSize(20);
+        doc.setFont('helvetica', 'bold');
+        doc.text('TICKET DE COMPRA', 105, 55, { align: 'center' });
+        
+        // Información del ticket
+        doc.setFontSize(12);
+        doc.setFont('helvetica', 'normal');
+        
+        let yPosition = 75;
+        const lineHeight = 8;
+        
+        // Información de la compra
+        const ticketData = [
+            ['Número de Venta:', `#${saleId}`],
+            ['Cliente:', currentUser.username || 'Cliente'],
+            ['Película:', currentMovie.title || 'N/A'],
+            ['Fecha de Función:', formatDate(selectedShowtime.date) || 'N/A'],
+            ['Hora de Función:', formatTime(selectedShowtime.time) || 'N/A'],
+            ['Sala:', selectedShowtime.theater_name || selectedShowtime.theater_id],
+            ['Asientos:', seatsString],
+            ['Cantidad de Boletos:', (seatsString.split(', ').length).toString()],
+            ['Subtotal:', formatCurrency(sale.subtotal)],
+            ['Descuento:', formatCurrency(sale.discount_amount || 0)],
+            ['Total Pagado:', formatCurrency(sale.total)]
+        ];
+        
+        // Dibujar información en el PDF
+        ticketData.forEach(([label, value]) => {
+            doc.setFont('helvetica', 'bold');
+            doc.text(label, 20, yPosition);
+            doc.setFont('helvetica', 'normal');
+            doc.text(value, 80, yPosition);
+            yPosition += lineHeight;
+        });
+        
+        // Línea separadora
+        yPosition += 10;
+        doc.setDrawColor(...primaryColor);
+        doc.setLineWidth(1);
+        doc.line(20, yPosition, 190, yPosition);
+        
+        // Información adicional
+        yPosition += 15;
+        doc.setFontSize(10);
+        doc.setTextColor(100, 100, 100);
+        doc.text('Fecha de Compra: ' + new Date().toLocaleString('es-ES'), 20, yPosition);
+        yPosition += 6;
+        doc.text('Método de Pago: Tarjeta de Crédito', 20, yPosition);
+        
+        // Código QR simulado (rectángulo como placeholder)
+        yPosition += 15;
+        doc.setFillColor(200, 200, 200);
+        doc.rect(20, yPosition, 25, 25, 'F');
+        doc.setTextColor(...textColor);
+        doc.setFontSize(8);
+        doc.text('QR Code', 32.5, yPosition + 13, { align: 'center' });
+        
+        // Términos y condiciones
+        yPosition += 35;
+        doc.setFontSize(8);
+        doc.setTextColor(120, 120, 120);
+        const terms = [
+            '• Presente este ticket en taquilla para validar su entrada',
+            '• Llegue 15 minutos antes del inicio de la función',
+            '• No se permiten reembolsos una vez iniciada la función',
+            '• Conserve este ticket durante toda la función'
+        ];
+        
+        terms.forEach(term => {
+            doc.text(term, 20, yPosition);
+            yPosition += 5;
+        });
+        
+        // Footer
+        yPosition += 10;
+        doc.setFillColor(...backgroundColor);
+        doc.rect(0, yPosition, 210, 30, 'F');
+        
+        doc.setTextColor(...primaryColor);
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'bold');
+        doc.text('¡Gracias por elegir CINEMAX!', 105, yPosition + 15, { align: 'center' });
+        doc.setFont('helvetica', 'normal');
+        doc.text('Disfrute su película', 105, yPosition + 22, { align: 'center' });
+        
+        // Generar nombre del archivo
+        const fileName = `CINEMAX_Ticket_${saleId}_${new Date().toISOString().split('T')[0]}.pdf`;
+        
+        // Descargar el PDF
+        doc.save(fileName);
+        
+        showNotification('PDF generado exitosamente', 'success');
+        
+    } catch (error) {
+        console.error('Error al generar PDF:', error);
+        showNotification('Error al generar el PDF: ' + error.message, 'error');
+    }
 }
